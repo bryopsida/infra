@@ -1,5 +1,7 @@
 ---
 all:
+  vars:
+    timezone: UTC
   hosts:
     customAdapterHost1:
       adapter_name: wlo1
@@ -10,6 +12,8 @@ all:
     controller:
       hosts:
         controller1:
+          kube_config: /etc/rancher/k3s/k3s.yaml
+          helm_wait: true
           longhorn_disks_config:
             longhornHost1: >-
               "[

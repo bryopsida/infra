@@ -1,0 +1,7 @@
+---
+cilium_namespace: cilium
+cilium_ipv4NativeRoutingCIDR: "192.168.1.0/24"
+cilium_ipv6NativeRoutingCIDR : "fde4:4129:d7d0:d7ff::/64"
+cilium_version: "1.14.5"
+cilium_state: 'present'
+cilium_wait_timeout: '15m0s'

@@ -1,0 +1,19 @@
+---
+- name: Install PIP
+  ansible.builtin.package:
+    name:
+      - pip
+    state: present
+- name: Install Openshift Libraries
+  ansible.builtin.pip:
+    name:
+      - openshift
+      - kubernetes
+      - PyYAML
+      - jsonpatch
+    state: present
+- name: Install Helm Diff
+  become: true
+  kubernetes.core.helm_plugin:
+    plugin_path: "https://github.com/databus23/helm-diff"
+    state: present

@@ -1,0 +1,138 @@
+---
+- name: Create istio-system Namespace
+  kubernetes.core.k8s:
+    name: istio-system
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: istio
+- name: Create istio-ingress Namespace
+  tags: istio
+  kubernetes.core.k8s:
+    name: istio-ingress
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+- name: Make istio-ingress Namespace injectable
+  tags: istio
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: istio-ingress
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          istio-injection: enabled
+- name: Add Istio Helm Repo
+  tags: istio
+  kubernetes.core.helm_repository:
+    name: istio
+    repo_url: https://istio-release.storage.googleapis.com/charts
+- name: Add Kiali Helm Repo
+  tags: istio
+  kubernetes.core.helm_repository:
+    name: kiali
+    repo_url: https://kiali.org/helm-charts
+- name: Install Istio Base
+  tags: istio
+  kubernetes.core.helm:
+    state: "{{ istio_state }}"
+    chart_ref: istio/base
+    release_namespace: istio-system
+    update_repo_cache: true
+    name: istio-base
+    kubeconfig: "{{ kube_config }}"
+    wait: "{{ helm_wait }}"
+    chart_version: "{{ istio_version }}"
+- name: Install Istio CNI
+  tags: istio
+  kubernetes.core.helm:
+    chart_ref: istio/cni
+    state: "{{ istio_cni_state }}"
+    release_namespace: istio-system
+    name: istio-cni
+    update_repo_cache: true
+    kubeconfig: "{{ kube_config }}"
+    wait: "{{ helm_wait }}"
+    chart_version: "{{ istio_version }}"
+- name: Install Istio Discovery
+  tags: istio
+  kubernetes.core.helm:
+    chart_ref: istio/istiod
+    release_namespace: istio-system
+    name: istio-discovery
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    chart_version: "{{ istio_version }}"
+    values:
+      global:
+        logAsJson: true
+        proxy:
+          holdApplicationUntilProxyStarts: true
+          privileged: false
+          tracer: zipkin
+        tracer:
+          zipkin:
+            address: grafana-agent.grafana.svc.cluster.local.:9411
+      pilot:
+        env:
+          ISTIO_DUAL_STACK: "true"
+      istio_cni:
+        enabled: true
+      meshConfig:
+        accessLogEncoding: JSON
+        accessLogFile: /dev/stdout
+        defaultConfig:
+          proxyMetadata:
+            ISTIO_AGENT_DUAL_STACK: "true"
+          tracing:
+            sampling: 100
+        enablePrometheusMerge: true
+        enableTracing: true
+        ingressService: istio-ingress/istio-ingress
+        rootNamespace: istio-system
+- name: Install Istio Gateway
+  tags: istio
+  kubernetes.core.helm:
+    state: "{{ istio_ingress_state }}"
+    chart_ref: istio/gateway
+    chart_version: "{{ istio_version }}"
+    release_namespace: istio-ingress
+    name: istio-ingress
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    values:
+      env:
+        ISTIO_DUAL_STACK: "true"
+- name: Install Kiali
+  tags: istio
+  kubernetes.core.helm:
+    chart_ref: kiali/kiali-operator
+    release_namespace: istio-system
+    name: kiali
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    state: "{{ istio_kiali_state }}"
+    values:
+      cr:
+        create: true
+        namespace: istio-system
+        spec:
+          istio_namespace: istio-system
+          auth:
+            strategy: anonymous
+          external_services:
+            grafana:
+              enabled: true
+              in_cluster_url: http://prom-grafana.prometheus.svc.cluster.local:80/
+              url: http://prom-grafana.prometheus.svc.cluster.local:80/
+            prometheus:
+              url: http://prom-kube-prometheus-stack-prometheus.prometheus.svc.cluster.local:9090/
+            tracing:
+              enabled: true
+              in_cluster_url: http://jaeger-query.jaeger.svc.cluster.local:16685/jaeger
+              use_grpc: true

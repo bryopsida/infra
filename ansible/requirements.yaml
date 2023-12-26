@@ -1,0 +1,6 @@
+---
+collections:
+- kubernetes.core
+- community.general
+roles:
+- mrlesmithjr.netplan

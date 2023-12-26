@@ -1,0 +1,70 @@
+- name: Create cilium Namespace
+  kubernetes.core.k8s:
+    name: "{{ cilium_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: cilium
+- name: Make cilium namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ cilium_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: cilium
+- name: Add Cilium Helm Repo
+  kubernetes.core.helm_repository:
+    name: cilium
+    repo_url: https://helm.cilium.io/
+  tags: cilium
+- name: Install Cilium
+  tags: cilium
+  kubernetes.core.helm:
+    chart_ref: cilium/cilium
+    state: "{{ cilium_state }}"
+    release_namespace: cilium
+    name: cilium
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ cilium_wait_timeout }}"
+    chart_version: "{{ cilium_version }}"
+    values:
+      cni:
+        exclusive: false
+      ipv4NativeRoutingCIDR: "{{ cilium_ipv4NativeRoutingCIDR }}"
+      ipv6NativeRoutingCIDR : "{{ cilium_ipv6NativeRoutingCIDR }}"
+      l7Proxy: false
+      endpointRoutes:
+        enabled: true
+      enableIPv4Masquerade: false
+      enableIPv6Masquerade: false
+      bpf:
+        masquerade: true
+      ipv4:
+        enabled: true
+      ipv6:
+        enabled: true
+      encryption:
+        enabled: true
+        type: wireguard
+        nodeEncryption: false
+        wireguard:
+          userspaceFallback: true
+      containerRuntime:
+        integration: containerd
+        socketPath: /var/run/k3s/containerd/containerd.sock
+      hubble:
+        relay:
+          enabled: true
+        ui:
+          enabled: true
+      kubeProxyReplacement: true
+      socketLB:
+        hostNamespaceOnly: true
