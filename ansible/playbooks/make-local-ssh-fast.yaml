@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Disable GSSAPI
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        search_string: GSSAPIAuthentication yes
+        line: GSSAPIAuthentication no
+    - name: Disable DNS lookup
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        search_string: UseDNS yes
+        line: UseDNS no

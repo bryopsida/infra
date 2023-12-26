@@ -1,0 +1,12 @@
+---
+- name: Install Network Attached Storage Packages
+  hosts: all
+  become: true
+  tasks:
+    - name: Install packages
+      ansible.builtin.apt:
+        pkg:
+          - open-iscsi
+          - nfs-common
+          - libnfs-utils
+          - libopenscap8

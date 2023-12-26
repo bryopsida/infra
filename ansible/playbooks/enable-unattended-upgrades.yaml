@@ -1,0 +1,5 @@
+- hosts: all
+  become: true
+  roles:
+  - role: hifis.unattended_upgrades
+    unattended_automatic_reboot: true

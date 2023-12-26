@@ -1,0 +1,89 @@
+---
+all:
+  hosts:
+    customAdapterHost1:
+      adapter_name: wlo1
+    customAdapterHost2:
+      adapter_name: wlo1
+  children:
+    # where kubectl and helm commands run
+    controller:
+      hosts:
+        controller1:
+          longhorn_disks_config:
+            longhornHost1: >-
+              "[
+                  {   
+                      \"name\":\"ssd\", 
+                      \"path\":\"/ext-ssd\",
+                      \"allowScheduling\": true
+                      \"tags\":[
+                          \"ssd\"
+                      ]
+                  }
+              ]"
+            longhornHost2: >-
+              "[
+                  {   
+                      "name":"qnap", 
+                      "path":"/mnt/longhorn-qnap",
+                      "allowScheduling": true
+                      "tags":[
+                          "qnap"
+                      ]
+                  }
+              ]"
+            longhornNoDiskHost1: >-
+              "[]"
+            longhornNoDiskHost2: >-
+              "[]"
+            longhornNoDiskHost3: >-
+              "[]"
+            longhornNoDiskHost4: >-
+              "[]"
+            longhornNoDiskHost5: >-
+              "[]"
+            longhornNoDiskHost6: >-
+              "[]"
+            longhornNoDiskHost7: >-
+              "[]"
+            longhornNoDiskHost8: >-
+              "[]"
+    server:
+      hosts:
+        controller1:
+          k3s_run_cluster_init: true
+        controller2:
+        controller3:
+    agent:
+      hosts:
+        node1:
+        node2:
+        node3:
+        node4:
+        node5:
+        node6:
+        node7:
+        node8:
+        node9:
+    k3s_cluster:
+      vars:
+        k3s_version: v1.28.2+k3s1
+        k3s_run_cluster_init: false
+        ansible_user: ansible
+        systemd_dir: /etc/systemd/system
+      children:
+        agent:
+        server:
+    raspberrypi:
+      hosts:
+        pi1:
+        pi2:
+        pi3:
+        pi4:
+        pi5:
+        pi6:
+        pi7:
+        pi8:
+        pi9:
+        pi10:

@@ -1,0 +1,8 @@
+---
+- name: Normalize time settings
+  hosts: all
+  become: true
+  tasks:
+    - name: Set timezone
+      community.general.system.timezone:
+        name: "{{ timezone | default('UTC') }}"

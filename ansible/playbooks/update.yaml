@@ -1,0 +1,12 @@
+---
+- name: Update Systems
+  hosts: all
+  tasks:
+    - name: Update Apt
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+        state: present
+        autoremove: true
+        autoclean: true
+        upgrade: true

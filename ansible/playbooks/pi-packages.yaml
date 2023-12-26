@@ -1,0 +1,9 @@
+---
+- name: Install pi packages
+  hosts: raspberrypi
+  become: true
+  tasks:
+    - name: Install packages
+      ansible.builtin.apt:
+        pkg:
+          - linux-modules-extra-raspi

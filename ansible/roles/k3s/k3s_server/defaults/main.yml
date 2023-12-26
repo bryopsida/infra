@@ -1,0 +1,23 @@
+---
+k3s_server_location: "/var/lib/rancher/k3s"
+systemd_dir: "/etc/systemd/system"
+api_port: 6443
+kubeconfig: ~/.kube/config.new
+user_kubectl: true
+extra_server_args: |
+  --protect-kernel-defaults=true \
+  --secrets-encryption=true \
+  --disable servicelb \
+  --disable traefik \
+  --flannel-backend=none \
+  --disable-network-policy \
+  --disable-cloud-controller \
+  --disable-kube-proxy \
+  --kube-apiserver-arg='request-timeout=300s' \
+  --kube-apiserver-arg='service-account-lookup=true' \
+  --kube-apiserver-arg='enable-admission-plugins=NodeRestriction,PodSecurity,NamespaceLifecycle,ServiceAccount' \
+  --kube-controller-manager-arg='terminated-pod-gc-threshold=10' \
+  --kube-controller-manager-arg='use-service-account-credentials=true' \
+  --kubelet-arg='streaming-connection-idle-timeout=5m' \
+  --cluster-cidr=10.42.0.0/16,2001:cafe:42:0::/56 --service-cidr=10.43.0.0/16,2001:cafe:42:1::/112 \
+  --kubelet-arg='make-iptables-util-chains=true'

@@ -1,0 +1,10 @@
+---
+- name: Get information on hostnames and users
+  hosts: all
+  tasks:
+    - name: get ansible user on remote system
+      ansible.builtin.debug:
+        msg: current user is {{ ansible_user_id }}
+    - name: get hostname of remote system
+      ansible.builtin.debug:
+        msg: current host is {{ ansible_hostname }}

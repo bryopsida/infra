@@ -1,0 +1,19 @@
+---
+- hosts: raspberrypi
+  become: true
+  tasks:
+    - name: Create file if not exists
+      ansible.builtin.copy:
+        content: ""
+        dest: /boot/firmware/usercfg.txt
+        force: false
+        group: sys
+        owner: root
+        mode: 0655
+    - name: Set POE fan firmware settings
+      ansible.builtin.lineinfile:
+        path: /boot/firmware/usercfg.txt
+        state: present
+        regex: ^dtparam=poe_fan_temp0=.*
+        line: ""
+      throttle: 1
