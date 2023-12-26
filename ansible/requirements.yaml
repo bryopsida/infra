@@ -4,3 +4,4 @@ collections:
 - community.general
 roles:
 - mrlesmithjr.netplan
+- hifis.unattended_upgrades

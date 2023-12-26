@@ -1,6 +1,7 @@
 ---
 - name: Get stable ipv6 address
   hosts: all
+  tags: custom-facts
   tasks:
     - name: Get Default IPV6
       ansible.builtin.debug:
@@ -8,9 +9,9 @@
     - name: Get All IPV6
       ansible.builtin.debug:
         var: ansible_all_ipv6_addresses
-    - name: Get Eth0
+    - name: Get Adapter Info
       ansible.builtin.debug:
-        var: ansible_{{ adapter_name }}
+        var: ansible_{{ adapter_name | default('eth0') }}
     - name: Get IP 6 information
       ansible.builtin.command: ip -6 -j addr show scope global {{ adapter_name | default('eth0') }}
       register: ip_output_json
@@ -26,6 +27,7 @@
     - name: Show Addresses Matched
       ansible.builtin.debug:
         var: ipv6_perm_addresses
+    # TODO: move out prefix match to a variable
     - name: Set Matched Prefix
       ansible.builtin.set_fact:
         ipv6_matched_prefix: "{{ ipv6_perm_addresses | selectattr('local', 'search', '^2600.*$') }}"
@@ -41,9 +43,9 @@
     - name: Set ipv4_stable_address
       ansible.builtin.set_fact:
         ipv4_stable_address: "{{ ipv4_addr_info[0].addr_info[0] }}"
-    - name: Get Eth0 IPV6
+    - name: Get Adapter IPV6
       ansible.builtin.debug:
         var: ipv6_stable_address
-    - name: Get Eth0 IPV4
+    - name: Get Adapter IPV4
       ansible.builtin.debug:
         var: ipv4_stable_address

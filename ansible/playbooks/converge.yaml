@@ -1,0 +1,34 @@
+---
+# first run the connectivity test
+- name: Check Inventory Connectivity
+  ansible.builtin.import_playbook: connectivity-test.yaml
+# next install baseline packages
+- name: Install Baseline Packages
+  ansible.builtin.import_playbook: package-baseline.yaml
+# enable unattended updates of OS packages
+- name: Enable Unattended Updates
+  ansible.builtin.import_playbook: enable-unattended-upgrades.yaml
+# next setup the baseline for controller(s)
+- name: Install Controller Baseline Packages
+  ansible.builtin.import_playbook: controller.yaml
+# next install packages for raspberry PI(s)
+- name: Install Raspberry PI Baseline Packages
+  ansible.builtin.import_playbook: pi-packages.yaml
+# adjust poe fan settings
+- name: Manage Raspberry PI POE Fan Settings
+  ansible.builtin.import_playbook: poe-fan-speeds.yaml
+# manage netplan
+- name: Manage Network Adapter Settings
+  ansible.builtin.import_playbook: netplan.yaml
+# set custom facts
+- name: Populate Custom Facts
+  ansible.builtin.import_playbook: get-public-ip-addresses.yaml
+# manage k3s cluster
+- name: K3S
+  ansible.builtin.import_playbook: k3s.yaml
+# manage cluster networking
+- name: Cluster Networking
+  ansible.builtin.import_playbook: cluster-networking.yaml
+# manage cluster storage
+- name: Cluster Storage
+  ansible.builtin.import_playbook: cluster-storage.yaml

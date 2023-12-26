@@ -1,0 +1,5 @@
+---
+longhorn_namespace: longhorn-system
+longhorn_version: 1.5.3
+longhorn_wait_timeout: 5m0s
+longhorn_state: present

@@ -1,0 +1,11 @@
+---
+- name: Manage longhorn disk configurations
+  kubernetes.core.k8s:
+    state: patched
+    kind: Node
+    name: "{{ item.node }}"
+    definition:
+      metadata:
+        annotations:
+          "node.longhorn.io/default-disks-config": '{{ item.config | to_json }}'
+  loop: "{{ longhorn_disks_config }}"
