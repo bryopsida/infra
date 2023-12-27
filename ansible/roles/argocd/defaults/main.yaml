@@ -1,0 +1,5 @@
+argocd_namespace: argocd
+argocd_image_updater_version: 1.4.1
+argocd_version: 5.51.6
+argocd_state: present
+argocd_wait_timeout: 5m0s

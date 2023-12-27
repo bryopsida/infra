@@ -1,0 +1,5 @@
+---
+- name: Manage GitOps
+  hosts: controller
+  roles:
+    - role: argocd

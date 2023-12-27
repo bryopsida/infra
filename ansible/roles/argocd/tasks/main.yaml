@@ -1,0 +1,84 @@
+- name: Create argocd Namespace
+  kubernetes.core.k8s:
+    name: "{{ argocd_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: argocd
+- name: Make argocd namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ argocd_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: argocd
+- name: Add ArgoCD Helm Repo
+  kubernetes.core.helm_repository:
+    name: argocd
+    repo_url: https://argoproj.github.io/argo-helm
+  tags: argocd
+- name: Install ArgoCD
+  tags: argocd
+  kubernetes.core.helm:
+    chart_ref: argocd/argo-cd
+    state: "{{ argocd_state }}"
+    release_namespace: "{{ argocd_namespace }}"
+    name: argocd
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ argocd_wait_timeout }}"
+    chart_version: "{{ argocd_version }}"
+    values:
+      configs:
+        repositories:
+          istio-helm-repo:
+            url: https://istio-release.storage.googleapis.com/charts
+            name: istio.io
+            type: helm
+          bitnami:
+            url: https://charts.bitnami.com/bitnami
+            name: bitnami
+            type: helm
+          prometheus:
+            url: https://prometheus-community.github.io/helm-charts
+            name: prometheus
+            type: helm
+          groundhog2k:
+            url: https://groundhog2k.github.io/helm-charts/
+            name: groundhog2k
+            type: helm
+          elastic:
+            url: https://helm.elastic.co
+            name: elastic
+            type: helm
+          bryopsida-wg:
+            url: https://bryopsida.github.io/wireguard-chart
+            name: bryopsida-wg
+            type: helm
+          bryopsida:
+            url: https://bryopsida.github.io/helm
+            name: bryopsida
+            type: helm
+          infra:
+            url: https://github.com/bryopsida/infra.git
+            name: infra
+            type: git
+- name: Install ArgoCD Image Updater
+  tags: argocd
+  kubernetes.core.helm:
+    chart_ref: argocd/argocd-apps
+    state: "{{ argocd_state }}"
+    release_namespace: "{{ argocd_namespace }}"
+    name: argocd-apps
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ argocd_wait_timeout }}"
+    chart_version: "{{ argocd_image_updater_version }}"

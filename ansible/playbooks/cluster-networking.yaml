@@ -1,6 +1,7 @@
 ---
 - name: Manage Cluster Networking
   hosts: controller
+  become: true
   roles:
     - role: cilium
     - role: istio

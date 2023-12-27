@@ -44,11 +44,11 @@
       k8sServicePort: "{{ api_port | default(6443) }}"
       l7Proxy: false
       endpointRoutes:
-        enabled: true
-      enableIPv4Masquerade: false
-      enableIPv6Masquerade: false
+        enabled: false
+      enableIPv4Masquerade: true
+      enableIPv6Masquerade: true
       bpf:
-        masquerade: true
+        masquerade: false
       ipv4:
         enabled: true
       ipv6:
@@ -56,7 +56,7 @@
       encryption:
         enabled: true
         type: wireguard
-        nodeEncryption: false
+        nodeEncryption: true
         wireguard:
           userspaceFallback: true
       containerRuntime:

@@ -1,6 +1,7 @@
 ---
 - name: Manage Cluster Storage
   hosts: controller
+  become: true
   roles:
     - role: longhorn_disks_config
     - role: longhorn
