@@ -1,0 +1,66 @@
+---
+- name: Create cert-manager Namespace
+  kubernetes.core.k8s:
+    name: "{{ cert_manager_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: cert-manager
+- name: Make cert-manager namespace PSA restricted
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ cert_manager_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: restricted
+          pod-security.kubernetes.io/audit: restricted
+          pod-security.kubernetes.io/warn: restricted
+  tags: cert-manager
+- name: Add JetStack Helm Repo
+  kubernetes.core.helm_repository:
+    name: jetstack
+    repo_url: https://charts.jetstack.io
+  tags: cert-manager
+- name: Manage cert-manager helm release
+  tags: cert-manager
+  kubernetes.core.helm:
+    chart_ref: jetstack/cert-manager
+    state: "{{ cert_manager_state }}"
+    release_namespace: "{{ cert_manager_namespace }}"
+    name: cert-manager
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ cert_manager_wait_timeout }}"
+    chart_version: "{{ cert_manager_version }}"
+    values:
+      installCRDs: true
+- name: Wait for CRDs to be available
+  tags:
+    - cert-manager
+    - trust-manager
+  ansible.builtin.command: kubectl -n {{ cert_manager_namespace }} wait --for condition=established --timeout=5s crd/certificates.cert-manager.io
+  register: crd_status
+  until: crd_status.rc == 0
+  retries: 7
+  delay: 1
+  changed_when: false
+- name: Manage trust-manager helm release
+  tags:
+    - cert-manager
+    - trust-manager
+  kubernetes.core.helm:
+    chart_ref: jetstack/trust-manager
+    state: "{{ cert_manager_trust_manager_state }}"
+    release_namespace: "{{ cert_manager_namespace }}"
+    name: trust-manager
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ cert_manager_wait_timeout }}"
+    chart_version: "{{ cert_manager_trust_manager_version }}"
+    values:
+      namespace: "{{ cert_manager_namespace }}"

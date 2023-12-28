@@ -38,10 +38,6 @@
     values:
       configs:
         repositories:
-          istio-helm-repo:
-            url: https://istio-release.storage.googleapis.com/charts
-            name: istio.io
-            type: helm
           bitnami:
             url: https://charts.bitnami.com/bitnami
             name: bitnami
@@ -58,6 +54,14 @@
             url: https://helm.elastic.co
             name: elastic
             type: helm
+          jaeger:
+            url: https://jaegertracing.github.io/helm-charts
+            name: jaeger
+            type: helm
+          couchdb:
+            url: https://apache.github.io/couchdb-helm/
+            name: couchdb
+            type: helm
           bryopsida-wg:
             url: https://bryopsida.github.io/wireguard-chart
             name: bryopsida-wg
@@ -66,10 +70,6 @@
             url: https://bryopsida.github.io/helm
             name: bryopsida
             type: helm
-          infra:
-            url: https://github.com/bryopsida/infra.git
-            name: infra
-            type: git
 - name: Install ArgoCD Image Updater
   tags: argocd
   kubernetes.core.helm:

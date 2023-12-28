@@ -4,4 +4,5 @@
   become: true
   roles:
     - role: cilium
+    - role: cert_manager
     - role: istio

@@ -70,3 +70,12 @@
       kubeProxyReplacement: true
       socketLB:
         hostNamespaceOnly: true
+- name: Wait for CRDs to be available
+  tags:
+    - cilium
+  ansible.builtin.command: kubectl -n {{ cilium_namespace }} wait --for condition=established --timeout=5s crd/ciliumnetworkpolicies.cilium.io
+  register: crd_status
+  until: crd_status.rc == 0
+  retries: 7
+  delay: 1
+  changed_when: false
