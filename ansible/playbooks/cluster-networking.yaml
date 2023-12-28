@@ -5,4 +5,5 @@
   roles:
     - role: cilium
     - role: cert_manager
+    - role: metallb
     - role: istio

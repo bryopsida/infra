@@ -1,0 +1,82 @@
+---
+- name: Create metallb Namespace
+  tags:
+    - metallb
+  kubernetes.core.k8s:
+    name: "{{ metallb_namespace }}"
+    kind: Namespace
+    state: "{{ metallb_state }}"
+    kubeconfig: "{{ kube_config }}"
+- name: Make {{ metallb_namespace }} namespace privileged
+  tags:
+    - metallb
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ metallb_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+- name: Add metallb helm repo
+  tags:
+    - metallb
+  kubernetes.core.helm_repository:
+    name: metallb
+    repo_url: https://metallb.github.io/metallb
+- name: Install Metallb
+  tags:
+    - metallb
+  kubernetes.core.helm:
+    chart_ref: metallb/metallb
+    release_namespace: "{{ metallb_namespace }}"
+    update_repo_cache: true
+    name: metallb
+    kubeconfig: "{{ kube_config }}"
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ metallb_wait_timeout }}"
+    chart_version: "{{ metallb_version }}"
+- name: Wait for CRDs to be available
+  tags:
+    - metallb
+  ansible.builtin.command: kubectl -n {{ metallb_namespace }} wait --for condition=established --timeout=5s crd/addresspools.metallb.io
+  register: crd_status
+  until: crd_status.rc == 0
+  retries: 7
+  delay: 1
+  changed_when: false
+- name: Set Address Pool
+  tags:
+    - metallb
+  kubernetes.core.k8s:
+    state: "{{ metallb_state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ metallb_namespace }}"
+      spec:
+        addresses: "{{ item.addresses }}"
+
+  loop: "{{ metallb_address_pools }}"
+- name: Add Layer2 Advertisment
+  tags:
+    - metallb
+  kubernetes.core.k8s:
+    state: "{{ metallb_state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: L2Advertisement
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ metallb_namespace }}"
+      spec:
+        ipAddressPools: "{{ item.ipAddressPools }}"
+        nodeSelectors: "{{ item.nodeSelectors }}"
+  loop: "{{ metallb_layer2_adverts }}"
