@@ -1,0 +1,7 @@
+---
+- name: Manage Cluster Compliance Tools
+  hosts: controller
+  become: true
+  roles:
+    - role: trivy
+    - role: kyverno

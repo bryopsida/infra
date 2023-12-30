@@ -1,0 +1,4 @@
+trivy_state: present
+trivy_version: 0.19.1
+trivy_wait_timeout: 5m0s
+trivy_namespace: trivy

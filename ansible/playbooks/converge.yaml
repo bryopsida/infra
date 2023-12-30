@@ -32,6 +32,12 @@
 # manage cluster storage
 - name: Cluster Storage
   ansible.builtin.import_playbook: cluster-storage.yaml
+# manage cluster monitoring
+- name: Cluster Monitoring
+  ansible.builtin.import_playbook: cluster-monitoring.yaml
+# manage cluster compliance tools
+- name: Cluster Compliance
+  ansible.builtin.import_playbook: cluster-compliance.yaml
 # manage/bootstrap gitops
 - name: GitOPS
   ansible.builtin.import_playbook: gitops.yaml

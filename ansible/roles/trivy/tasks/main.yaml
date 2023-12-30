@@ -1,0 +1,37 @@
+- name: Create trivy Namespace
+  kubernetes.core.k8s:
+    name: "{{ trivy_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: trivy
+- name: Make trivy namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ trivy_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: trivy
+- name: Add trivy Helm Repo
+  kubernetes.core.helm_repository:
+    name: trivy
+    repo_url: https://aquasecurity.github.io/helm-charts/
+  tags: trivy
+- name: Install trivy
+  tags: trivy
+  kubernetes.core.helm:
+    chart_ref: trivy/trivy-operator
+    state: "{{ trivy_state }}"
+    release_namespace: "{{ trivy_namespace }}"
+    name: trivy
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ trivy_wait_timeout }}"
+    chart_version: "{{ trivy_version }}"

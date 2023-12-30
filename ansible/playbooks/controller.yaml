@@ -2,5 +2,5 @@
 - hosts: controller
   become: true
   roles:
-    - role: ./roles/ansible_controller
     - role: ./roles/helm_controller
+    - role: ./roles/ansible_controller
