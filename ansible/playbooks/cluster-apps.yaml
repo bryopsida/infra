@@ -1,0 +1,6 @@
+---
+- name: Manage Cluster Apps
+  hosts: controller
+  become: true
+  roles:
+    - role: plex

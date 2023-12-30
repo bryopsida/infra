@@ -7,3 +7,5 @@
     - role: prometheus
     - role: jaeger
     - role: kiali
+    - role: couchdb
+    - role: syslog_portal

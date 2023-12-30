@@ -1,0 +1,15 @@
+plex_namespace: plex
+plex_chart_version: 0.1.0
+plex_wait_timeout: 5m0s
+plex_state: present
+# store in vault
+plex_claim_token: changeit
+plex_config_vol_size: 32Gi
+plex_config_vol_sc: ~
+plex_media_vol_size: 256Gi
+plex_media_vol_sc: ~
+plex_transcode_vol_size: 64Gi
+plex_transcode_vol_sc: ~
+plex_image_tag: "latest"
+plex_image_repo: "ghcr.io/linuxserver/plex"
+plex_image_pull_policy: "Always"

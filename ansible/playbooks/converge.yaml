@@ -35,3 +35,7 @@
 # manage/bootstrap gitops
 - name: GitOPS
   ansible.builtin.import_playbook: gitops.yaml
+- name: Functions As A Service
+  ansible.builtin.import_playbook: cluster-faas-framework.yaml
+- name: Applications
+  ansible.builtin.import_playbook: cluster-apps.yaml

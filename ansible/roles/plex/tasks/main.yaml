@@ -1,0 +1,61 @@
+- name: Create plex Namespace
+  kubernetes.core.k8s:
+    name: "{{ plex_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: plex
+- name: Manage plex namespace
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ plex_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+          istio-injection: enabled
+- name: Manage plex helm repo
+  kubernetes.core.helm_repository:
+    name: bryopsida
+    repo_url: https://bryopsida.github.io/helm
+  tags: plex
+- name: Manage plex helm release
+  tags: plex
+  kubernetes.core.helm:
+    chart_ref: bryopsida/plex
+    state: "{{ plex_state }}"
+    release_namespace: "{{ plex_namespace }}"
+    name: plex
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ plex_wait_timeout }}"
+    chart_version: "{{ plex_chart_version }}"
+    values:
+      claimToken: "{{ plex_claim_token }}"
+      configStorageSize: "{{ plex_config_vol_size }}"
+      configStorageClass: "{{ plex_config_vol_sc }}"
+      mediaStorageSize: "{{ plex_media_vol_size }}"
+      mediaStorageClass: "{{ plex_media_vol_sc }}"
+      transcodeStorageSize: "{{ plex_transcode_vol_size }}"
+      transcodeStorageClass: "{{ plex_transcode_vol_sc }}"
+      # linuxserver images use a init system that requires root
+      # in the future look into replacing their image with an image that can run non privileged
+      # securityContext:
+      #   allowPrivilegeEscalation: false
+      #   runAsNonRoot: true
+      #   capabilities:
+      #     drop:
+      #       - ALL
+      podSecurityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      image:
+        repository: "{{ plex_image_repo }}"
+        pullPolicy: "{{ plex_image_pull_policy }}"
+        tag: "{{ plex_image_tag }}"
+    

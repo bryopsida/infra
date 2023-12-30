@@ -1,0 +1,6 @@
+---
+- name: Manage Cluster FAAS
+  hosts: controller
+  become: true
+  roles:
+    - role: knative
