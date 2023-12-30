@@ -1,0 +1,82 @@
+---
+- name : Manage storage class secrets
+  tags:
+    - longhorn
+    - longhorn-storage-classes
+  kubernetes.core.k8s:
+    state: "{{ item.state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ item.namespace }}"
+      stringData:
+        CRYPTO_KEY_VALUE: "{{ item.key }}"
+        CRYPTO_KEY_PROVIDER: "{{ item.provider }}"
+        CRYPTO_KEY_CIPHER: "{{ item.cipher }}"
+        CRYPTO_KEY_HASH: "{{ item.hash }}"
+        CRYPTO_KEY_SIZE: "{{ item.size }}"
+        CRYPTO_PBKDF: "{{ item.pbkdf }}"
+  loop: "{{ longhorn_storage_classes_secrets }}"
+  loop_control:
+    label: "{{ item.name }}"
+- name : Manage storage classes
+  tags:
+    - longhorn
+    - longhorn-storage-classes
+  kubernetes.core.k8s:
+    state: "{{ item.state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ item.name }}"
+      provisioner: driver.longhorn.io
+      allowVolumeExpansion: "{{ item.allowVolumeExpansion }}"
+      reclaimPolicy: "{{ item.reclaimPolicy }}"
+      volumeBindingMode: "{{ item.volumeBindingMode }}"
+      parameters:
+        csi.storage.k8s.io/provisioner-secret-name: "{{ item.secretName }}"
+        csi.storage.k8s.io/provisioner-secret-namespace: "{{ item.secretNamespace }}"
+        csi.storage.k8s.io/node-publish-secret-name: "{{ item.secretName }}"
+        csi.storage.k8s.io/node-publish-secret-namespace: "{{ item.secretNamespace }}"
+        csi.storage.k8s.io/node-stage-secret-name: "{{ item.secretName }}"
+        csi.storage.k8s.io/node-stage-secret-namespace: "{{ item.secretNamespace }}"
+        encrypted: "{{ item.encrypted }}"
+        dataLocality: "{{ item.dataLocality }}"
+        fsType: "{{ item.fsType }}"
+        diskSelector: "{{ item.diskSelector }}"
+        staleReplicaTimeout: "{{ item.staleReplicaTimeout }}"
+  loop: "{{ longhorn_storage_classes_sc }}"
+  loop_control:
+    label: "{{ item.name }}"
+- name: Get Storage Classes
+  when: "longhorn_storage_classes_manages_default_sc"
+  tags:
+    - longhorn
+    - longhorn-storage-classes
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kube_config }}"
+    kind: StorageClass
+  register: longhorn_storage_classes_kube_sc
+- name: Manage Default Storage Class
+  when: longhorn_storage_classes_manages_default_sc
+  tags:
+    - longhorn
+    - longhorn-storage-classes
+  kubernetes.core.k8s:
+    state: patched
+    kind: StorageClass
+    name: "{{ item.metadata.name }}"
+    kubeconfig: "{{ kube_config}}"
+    definition:
+      metadata:
+        annotations:
+          "storageclass.kubernetes.io/is-default-class": "{{ (item.metadata.name == longhorn_storage_classes_default_sc ) | ternary('true', 'false') }}"
+  loop: "{{ longhorn_storage_classes_kube_sc.resources }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+  

@@ -2,7 +2,7 @@
   kubernetes.core.k8s:
     name: "{{ argocd_namespace }}"
     kind: Namespace
-    state: present
+    state: "{{ argocd_state }}"
     kubeconfig: "{{ kube_config }}"
   tags: argocd
 - name: Make argocd namespace privileged

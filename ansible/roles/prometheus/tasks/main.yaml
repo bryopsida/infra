@@ -1,0 +1,34 @@
+- name: Create prometheus Namespace
+  kubernetes.core.k8s:
+    name: "{{ prometheus_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: prometheus
+- name: Make prometheus namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ prometheus_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: prometheus
+- name: Add Prometheus Helm Repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+- name: Install Kube Stack
+  kubernetes.core.helm:
+    chart_ref: prometheus-community/kube-prometheus-stack
+    chart_version: "{{ prometheus_version }}"
+    release_namespace: "{{ prometheus_namespace }}"
+    name: prom
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ prometheus_wait_timeout }}"
+    kubeconfig: "{{ kube_config }}"
+    state: "{{ prometheus_state }}"

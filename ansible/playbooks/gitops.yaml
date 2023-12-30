@@ -3,3 +3,4 @@
   hosts: controller
   roles:
     - role: argocd
+      when: argocd_enabled

@@ -1,0 +1,36 @@
+---
+# store these in your vault file
+longhorn_storage_classes_secrets: []
+  # - name: example-1
+  #   namespace: longhorn-system
+  #   key: changeit
+  #   provider: secret
+  #   cipher: aes-xts-plain64
+  #   hash: sha256
+  #   size: '256'
+  #   pbkdf: 'argon2i'
+  #   state: present
+longhorn_storage_classes_sc: []
+  # - name: example-1
+  #   allowVolumeExpansion: true
+  #   reclaimPolicy: Retain
+  #   volumeBindingMode: Immediate
+  #   replicas: '1'
+  #   staleReplicaTimeout: '2880'
+  #   encrypted: 'true'
+  #   fsType: 'ext4'
+  #   diskSelector: 'ssd,fast'
+  #   nodeSelector: 'storage,fast'
+  #   dataLocality: 'disabled'
+  #   mkfsParams: ''
+  #   mountOptions: []
+  #   migratable: 'false'
+  #   recurringJobsSelector: ''
+  #   nfsOptions: ''
+  #   secretName: 'example-1'
+  #   secretNamespace: 'longhorn-system'
+# set to true if this role manages what's marked as the default storage class in k8s
+longhorn_storage_classes_manages_default_sc: false
+# set this to the name of the storage class that should be marked default
+# must be set to a valid value when longhorn_storage_classes_manages_default_sc is true
+longhorn_storage_classes_default_sc: ~

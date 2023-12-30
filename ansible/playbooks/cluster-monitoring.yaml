@@ -1,0 +1,9 @@
+---
+- name: Manage Cluster Monitoring
+  hosts: controller
+  become: true
+  roles:
+    - role: elastic_search
+    - role: prometheus
+    - role: jaeger
+    - role: kiali

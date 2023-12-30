@@ -5,3 +5,6 @@ cert_manager_state: present
 cert_manager_version: 1.13.3
 cert_manager_trust_manager_state: present
 cert_manager_trust_manager_version: 0.7.0
+cert_manager_issuers: []
+cert_manager_certificates: []
+cert_manager_secrets: []

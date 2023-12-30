@@ -1,0 +1,6 @@
+elastic_search_namespace: elastic
+elastic_search_version: 8.5.1
+elastic_search_state: present
+elastic_search_wait_timeout: 10m0s
+elastic_search_volume_size: 10Gi
+elastic_search_storage_class_name: ~

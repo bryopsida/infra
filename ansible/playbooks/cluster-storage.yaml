@@ -5,3 +5,4 @@
   roles:
     - role: longhorn_disks_config
     - role: longhorn
+    - role: longhorn_storage_classes

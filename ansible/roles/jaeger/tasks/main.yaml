@@ -1,0 +1,56 @@
+- name: Create jaeger Namespace
+  tags:
+    - jaeger
+  kubernetes.core.k8s:
+    name: "{{ jaeger_namespace }}"
+    kind: Namespace
+    state: "{{ jaeger_state }}"
+    kubeconfig: "{{ kube_config }}"
+- name: Add Jaeger Helm Repo
+  tags:
+    - jaeger
+  kubernetes.core.helm_repository:
+    name: jaegertracing
+    repo_url: https://jaegertracing.github.io/helm-charts
+- name: Manage elastic search secret
+  tags:
+    - jaeger
+    - jaeger-secrets
+  kubernetes.core.k8s:
+    state: "{{ jaeger_state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "es-credentials"
+        namespace: "{{ jaeger_namespace }}"
+      stringData:
+        password: "{{ jaeger_es_password }}"
+- name: Install Jaeger
+  tags:
+    - jaeger
+  kubernetes.core.helm:
+    chart_ref: jaegertracing/jaeger
+    chart_version: "{{ jaeger_version }}"
+    release_namespace: jaeger
+    name: jaeger
+    kubeconfig: "{{ kube_config }}"
+    state: "{{ jaeger_state }}"
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ jaeger_wait_timeout }}"
+    values:
+      provisionDataStore:
+        cassandra: false
+        elasticsearch: false
+        kafka: false
+      storage:
+        type: elasticsearch
+        elasticsearch:
+          host: elasticsearch-master.elastic.svc.cluster.local
+          existingSecret: es-credentials
+          existingSecretKey: password
+      collector:
+        service:
+          zipkin:
+            port: 9411

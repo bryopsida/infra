@@ -38,7 +38,11 @@
       defaultSettings:
         createDefaultDiskLabeledNodes: true
         defaultDataPath: /mnt/longhorn
-        defaultReplicaCount: 1
+        defaultReplicaCount: "{{ longhorn_default_replica_count }}"
         priorityClass: high-priority
         upgradeChecker: true
+        nodeDrainPolicy: "{{ longhorn_node_drain_policy }}"
+        guaranteedInstanceManagerCPU: "{{ longhorn_guaranteed_instance_manager_cpu}}"
+        fastReplicaRebuildEnabled: "{{ longhorn_fast_replica_rebuild_enabled }}"
+        snapshotDataIntegrityImmediateCheckAfterSnapshotCreation: "{{ longhorn_snapshot_data_int_check_after_creation }}"
   tags: longhorn

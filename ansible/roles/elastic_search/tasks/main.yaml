@@ -1,0 +1,34 @@
+- name: Create elastic search Namespace
+  tags: elastic-search
+  kubernetes.core.k8s:
+    name: "{{ elastic_search_namespace }}"
+    kind: Namespace
+    state: "{{ elastic_search_state }}"
+    kubeconfig: "{{ kube_config }}"
+- name: Add Elastic Helm Repo
+  tags: elastic-search
+  kubernetes.core.helm_repository:
+    name: elastic
+    repo_url: https://helm.elastic.co
+- name: Manage Elastic Search Release
+  tags: elastic-search
+  kubernetes.core.helm:
+    chart_ref: elastic/elasticsearch
+    chart_version: "{{ elastic_search_version }}"
+    release_namespace: "{{ elastic_search_namespace }}"
+    name: elastic
+    kubeconfig: "{{ kube_config }}"
+    state: "{{ elastic_search_state }}"
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ elastic_search_wait_timeout }}"
+    values:
+      extraEnvs:
+        - name: xpack.security.enabled
+          value: "false"
+      createCert: false
+      volumeClaimTemplate:
+        storageClassName: "{{ elastic_search_storage_class_name }}"
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: "{{ elastic_search_volume_size }}"

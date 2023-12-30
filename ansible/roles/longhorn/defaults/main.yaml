@@ -3,3 +3,12 @@ longhorn_namespace: longhorn-system
 longhorn_version: 1.5.3
 longhorn_wait_timeout: 5m0s
 longhorn_state: present
+# change this for prod systems, I leave this on so the automatic k3s upgrades can cordon/drain the node and proceed
+longhorn_node_drain_policy: always-allow
+# should be adjusted based on node size, this can be adjusted to ensure the instance manager has enough CPU to keep up
+# with workloads, if its set low the requests on the pods can be set in such a way where the node is overprovisioned and
+# cannot keep up with storage workloads
+longhorn_guaranteed_instance_manager_cpu: 25
+longhorn_snapshot_data_int_check_after_creation: true
+longhorn_fast_replica_rebuild_enabled: true
+longhorn_default_replica_count: 1

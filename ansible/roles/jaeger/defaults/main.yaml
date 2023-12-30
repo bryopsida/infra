@@ -1,0 +1,4 @@
+jaeger_wait_timeout: 10m0s
+jaeger_state: present
+jaeger_namespace: jaeger
+jaeger_version: 0.73.1

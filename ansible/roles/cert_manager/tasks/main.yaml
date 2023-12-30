@@ -64,3 +64,36 @@
     chart_version: "{{ cert_manager_trust_manager_version }}"
     values:
       namespace: "{{ cert_manager_namespace }}"
+- name: Manage cert-manager secrets
+  tags:
+    - cert-manager
+    - cert-manager-secrets
+  kubernetes.core.k8s:
+    state: "{{ item.state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition: "{{ item.definition }}"
+  loop: "{{ cert_manager_secrets }}"
+  loop_control:
+    label: "{{ item.definition.metadata.name }}"
+- name: Manage cert-manager issuers
+  tags:
+    - cert-manager
+    - cert-manager-issuers
+  kubernetes.core.k8s:
+    state: "{{ item.state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition: "{{ item.definition }}"
+  loop: "{{ cert_manager_issuers }}"
+  loop_control:
+    label: "{{ item.definition.metadata.name }}"
+- name: Manage cert-manager certificates
+  tags:
+    - cert-manager
+    - cert-manager-certificates
+  kubernetes.core.k8s:
+    state: "{{ item.state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition: "{{ item.definition }}"
+  loop: "{{ cert_manager_certificates }}"
+  loop_control:
+    label: "{{ item.definition.metadata.name }}"
