@@ -5,3 +5,5 @@
   roles:
     - role: plex
       when: plex_enabled
+    - role: openmct
+      when: openmct_enabled

@@ -1,0 +1,7 @@
+---
+wireguard_namespace: wireguard
+wireguard_version: 0.18.0
+wireguard_state: present
+wireguard_wait_timeout: 5m0s
+wireguard_enabled: true
+wireguard_config: {}

@@ -1,0 +1,42 @@
+---
+- name: Create cloudflare Namespace
+  kubernetes.core.k8s:
+    name: "{{ cloudflare_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: cloudflare
+- name: Make cloudflare namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ cloudflare_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: cloudflare
+- name: Add cloudflare Helm Repo
+  kubernetes.core.helm_repository:
+    name: cloudflare
+    repo_url: https://cloudflare.github.io/helm-charts
+  tags: cloudflare
+- name: Manage cloudflare tunnel release
+  tags:
+    - cloudflare
+  kubernetes.core.helm:
+    chart_ref: cloudflare/cloudflare-tunnel-remote
+    state: "{{ cloudflare_state }}"
+    release_namespace: cloudflare
+    name: cloudflare
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ cloudflare_wait_timeout }}"
+    chart_version: "{{ cloudflare_version }}"
+    values:
+      cloudflare:
+        tunnel_token: "{{ cloudflare_tunnel_token }}"

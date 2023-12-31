@@ -1,0 +1,7 @@
+---
+registry_namespace: registry
+registry_version: 1.13.1
+registry_state: present
+registry_wait_timeout: 10m0s
+registry_enabled: true
+registry_hostname: registry.test

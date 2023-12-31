@@ -4,3 +4,4 @@ istio_state: present
 istio_cni_state: present
 istio_ingress_state: present
 istio_enabled: false
+istio_gateways: []

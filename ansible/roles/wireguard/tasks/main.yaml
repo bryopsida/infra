@@ -1,0 +1,40 @@
+---
+- name: Create wireguard Namespace
+  kubernetes.core.k8s:
+    name: "{{ wireguard_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: wireguard
+- name: Make wireguard namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ wireguard_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: wireguard
+- name: Add wireguard Helm Repo
+  kubernetes.core.helm_repository:
+    name: wireguard
+    repo_url: https://bryopsida.github.io/wireguard-chart
+  tags: wireguard
+- name: Install wireguard
+  tags: wireguard
+  kubernetes.core.helm:
+    chart_ref: wireguard/wireguard
+    state: "{{ wireguard_state }}"
+    release_namespace: wireguard
+    name: wireguard
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ wireguard_wait_timeout }}"
+    chart_version: "{{ wireguard_version }}"
+    values:
+      wireguard: "{{ wireguard_config }}"

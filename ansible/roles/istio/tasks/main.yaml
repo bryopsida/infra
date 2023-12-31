@@ -102,3 +102,14 @@
     values:
       env:
         ISTIO_DUAL_STACK: "true"
+- name: Manage istio gateways
+  tags:
+    - istio
+    - istio-gateways
+  kubernetes.core.k8s:
+    state: "{{ item.state }}"
+    kubeconfig: "{{ kube_config }}"
+    definition: "{{ item.definition }}"
+  loop: "{{ istio_gateways }}"
+  loop_control:
+    label: "{{ item.definition.metadata.name }}"

@@ -1,2 +1,8 @@
 ---
 openmct_enabled: false
+openmct_state: present
+openmct_version: 0.1.0
+openmct_wait_timeout: 5m0s
+openmct_namespace: openmct
+openmct_hostname: openmct.test
+openmct_gateway_name: istio-ingress/default-gateway

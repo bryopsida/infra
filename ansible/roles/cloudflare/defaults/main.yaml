@@ -1,0 +1,6 @@
+cloudflare_namespace: cloudflare
+cloudflare_enabled: false
+cloudflare_state: present
+cloudflare_version: 0.1.1
+cloudflare_tunnel_token: changeit
+cloudflare_wait_timeout: 5m0s

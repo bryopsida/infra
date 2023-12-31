@@ -11,3 +11,7 @@
       when: metallb_enabled
     - role: istio
       when: istio_enabled
+    - role: cloudflare
+      when: cloudflare_enabled
+    - role: wireguard
+      when: wireguard_enabled

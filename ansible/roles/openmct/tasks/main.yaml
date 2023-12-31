@@ -1,0 +1,78 @@
+---
+- name: Create openmct Namespace
+  kubernetes.core.k8s:
+    name: "{{ openmct_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: openmct
+- name: Manage openmct namespace
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ openmct_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: restricted
+          pod-security.kubernetes.io/audit: restricted
+          pod-security.kubernetes.io/warn: restricted
+          istio-injection: enabled
+- name: Manage openmct helm repo
+  kubernetes.core.helm_repository:
+    name: bryopsida
+    repo_url: https://bryopsida.github.io/helm
+  tags: openmct
+- name: Manage openmct helm release
+  tags: openmct
+  kubernetes.core.helm:
+    chart_ref: bryopsida/openmct
+    state: "{{ openmct_state }}"
+    release_namespace: "{{ openmct_namespace }}"
+    name: openmct
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ openmct_wait_timeout }}"
+    chart_version: "{{ openmct_version }}"
+    values:
+      securityContext:
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+      podSecurityContext:
+        seccompProfile:
+          type: RuntimeDefault
+- name: Manage openmct virtual service
+  tags:
+    - openmct
+    - openmct-virtualservice
+    - virtualservice
+  kubernetes.core.k8s:
+    state: "{{ openmct_state}}"
+    name: "{{ openmct_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      apiVersion: networking.istio.io/v1beta1
+      kind: VirtualService
+      metadata:
+        name: openmct
+        namespace: "{{ openmct_namespace }}"
+      spec:
+        hosts:
+        - "{{ openmct_hostname }}"
+        gateways:
+        - "{{ openmct_gateway_name }}"
+        http:
+          - name: openmct
+            match:
+            - uri:
+                prefix: /
+            route:
+              - destination:
+                  host: openmct.openmct.svc.cluster.local
+                  port:
+                    number: 80
