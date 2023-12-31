@@ -1,5 +1,5 @@
 ---
-- name : Manage storage class secrets
+- name: Manage storage class secrets
   tags:
     - longhorn
     - longhorn-storage-classes
@@ -22,7 +22,7 @@
   loop: "{{ longhorn_storage_classes_secrets }}"
   loop_control:
     label: "{{ item.name }}"
-- name : Manage storage classes
+- name: Manage storage classes
   tags:
     - longhorn
     - longhorn-storage-classes
@@ -54,7 +54,7 @@
   loop_control:
     label: "{{ item.name }}"
 - name: Get Storage Classes
-  when: "longhorn_storage_classes_manages_default_sc"
+  when: longhorn_storage_classes_manages_default_sc
   tags:
     - longhorn
     - longhorn-storage-classes
@@ -71,12 +71,11 @@
     state: patched
     kind: StorageClass
     name: "{{ item.metadata.name }}"
-    kubeconfig: "{{ kube_config}}"
+    kubeconfig: "{{ kube_config }}"
     definition:
       metadata:
         annotations:
-          "storageclass.kubernetes.io/is-default-class": "{{ (item.metadata.name == longhorn_storage_classes_default_sc ) | ternary('true', 'false') }}"
+          storageclass.kubernetes.io/is-default-class: "{{ (item.metadata.name == longhorn_storage_classes_default_sc) | ternary('true', 'false') }}"
   loop: "{{ longhorn_storage_classes_kube_sc.resources }}"
   loop_control:
     label: "{{ item.metadata.name }}"
-  

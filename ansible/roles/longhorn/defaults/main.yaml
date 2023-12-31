@@ -12,3 +12,4 @@ longhorn_guaranteed_instance_manager_cpu: 25
 longhorn_snapshot_data_int_check_after_creation: true
 longhorn_fast_replica_rebuild_enabled: true
 longhorn_default_replica_count: 1
+longhorn_enabled: false

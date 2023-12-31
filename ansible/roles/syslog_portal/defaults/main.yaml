@@ -1,0 +1,6 @@
+---
+syslog_portal_state: present
+syslog_portal_version: "0.3.0"
+syslog_portal_wait_timeout: 5m0s
+syslog_portal_namespace: syslog_portal
+syslog_portal_enabled: false

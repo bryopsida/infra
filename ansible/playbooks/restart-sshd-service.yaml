@@ -2,6 +2,6 @@
 - hosts: all
   become: true
   tasks:
-    - name: sshd
+    - name: Sshd
       ansible.builtin.service:
         state: restarted

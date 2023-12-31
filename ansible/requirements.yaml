@@ -1,7 +1,7 @@
 ---
 collections:
-- kubernetes.core
-- community.general
+  - kubernetes.core
+  - community.general
 roles:
-- mrlesmithjr.netplan
-- hifis.unattended_upgrades
+  - mrlesmithjr.netplan
+  - hifis.unattended_upgrades

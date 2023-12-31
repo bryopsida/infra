@@ -6,9 +6,9 @@ ANSIBLE_EXTRA_ARGS ?=
 
 lint:
 	ansible-lint
+lint-fix:
+	ansible-lint --fix all
 apply:
 	ansible-playbook -i $(INVENTORY) -i $(VAULT) --vault-password-file=$(VAULT_PASSWORD_FILE) playbooks/$(PLAYBOOK) $(ANSIBLE_EXTRA_ARGS)
-format:
-	ansible-lint --write
 vault-change:
 	ansible-vault edit $(VAULT) --vault-password-file=$(VAULT_PASSWORD_FILE)

@@ -1,3 +1,4 @@
+---
 - name: Create elastic search Namespace
   tags: elastic-search
   kubernetes.core.k8s:
@@ -25,10 +26,13 @@
       extraEnvs:
         - name: xpack.security.enabled
           value: "false"
+        - name: xpack.security.transport.ssl.enabled
+          value: "false"
       createCert: false
+      protocol: http
       volumeClaimTemplate:
         storageClassName: "{{ elastic_search_storage_class_name }}"
-        accessModes: ["ReadWriteOnce"]
+        accessModes: [ReadWriteOnce]
         resources:
           requests:
             storage: "{{ elastic_search_volume_size }}"

@@ -4,4 +4,6 @@
   become: true
   roles:
     - role: trivy
+      when: trivy_enabled
     - role: kyverno
+      when: kyverno_enabled

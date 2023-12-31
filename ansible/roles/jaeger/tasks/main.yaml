@@ -1,3 +1,4 @@
+---
 - name: Create jaeger Namespace
   tags:
     - jaeger
@@ -23,7 +24,7 @@
       apiVersion: v1
       kind: Secret
       metadata:
-        name: "es-credentials"
+        name: es-credentials
         namespace: "{{ jaeger_namespace }}"
       stringData:
         password: "{{ jaeger_es_password }}"
@@ -47,9 +48,8 @@
       storage:
         type: elasticsearch
         elasticsearch:
-          host: elasticsearch-master.elastic.svc.cluster.local
-          existingSecret: es-credentials
-          existingSecretKey: password
+          host: opensearch-cluster-master-headless.elastic.svc.cluster.local
+          anonymous: true
       collector:
         service:
           zipkin:

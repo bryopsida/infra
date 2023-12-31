@@ -4,6 +4,10 @@
   become: true
   roles:
     - role: cilium
+      when: cilium_enabled
     - role: cert_manager
+      when: cert_manager_enabled
     - role: metallb
+      when: metallb_enabled
     - role: istio
+      when: istio_enabled

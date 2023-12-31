@@ -1,4 +1,6 @@
+---
 prometheus_namespace: prometheus
 prometheus_version: 55.5.1
 prometheus_state: present
 prometheus_wait_timeout: 10m0s
+prometheus_enabled: false

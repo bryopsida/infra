@@ -1,3 +1,4 @@
+---
 - name: Create kyverno Namespace
   kubernetes.core.k8s:
     name: "{{ kyverno_namespace }}"

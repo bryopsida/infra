@@ -1,0 +1,34 @@
+---
+- name: Create open search Namespace
+  tags: open-search
+  kubernetes.core.k8s:
+    name: "{{ open_search_namespace }}"
+    kind: Namespace
+    state: "{{ open_search_state }}"
+    kubeconfig: "{{ kube_config }}"
+- name: Add open-search Helm Repo
+  tags: open-search
+  kubernetes.core.helm_repository:
+    name: open-search
+    repo_url: https://opensearch-project.github.io/helm-charts
+- name: Manage Open Search Release
+  tags: open-search
+  kubernetes.core.helm:
+    chart_ref: open-search/opensearch
+    chart_version: "{{ open_search_version }}"
+    release_namespace: "{{ open_search_namespace }}"
+    name: elastic
+    kubeconfig: "{{ kube_config }}"
+    state: "{{ open_search_state }}"
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ open_search_wait_timeout }}"
+    values:
+      protocol: http
+      persistence:
+        storageClassName: "{{ open_search_storage_class_name }}"
+        accessModes: [ReadWriteOnce]
+        size: "{{ open_search_volume_size }}"
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      replicas: 1
+      singleNode: true

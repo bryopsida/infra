@@ -1,3 +1,4 @@
+---
 - name: Create trivy Namespace
   kubernetes.core.k8s:
     name: "{{ trivy_namespace }}"

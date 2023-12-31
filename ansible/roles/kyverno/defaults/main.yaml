@@ -1,4 +1,6 @@
+---
 kyverno_state: present
 kyverno_version: 3.1.2
 kyverno_wait_timeout: 5m0s
 kyverno_namespace: kyverno
+kyverno_enabled: false

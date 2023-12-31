@@ -1,15 +1,16 @@
 ---
 metallb_namespace: metallb-system
 metallb_wait_timeout: 5m0s
-metallb_version: 0.13.12
+metallb_version: "0.13.12"
 metallb_state: present
 metallb_address_pools:
   - name: default-address-pool
     addresses:
-      - '192.168.1.0/24'
-      - 'fd00:4f9a:a3c7:6e34::/64'
+      - 192.168.1.0/24
+      - fd00:4f9a:a3c7:6e34::/64
 metallb_layer2_adverts:
   - name: default-layer2-advert
     ipAddressPools:
       - default-address-pool
     nodeSelectors: []
+metallb_enabled: false

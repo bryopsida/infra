@@ -4,11 +4,11 @@
     state: patched
     kind: Node
     name: "{{ item.node }}"
-    kubeconfig: "{{ kube_config}}"
+    kubeconfig: "{{ kube_config }}"
     definition:
       metadata:
         annotations:
-          "node.longhorn.io/default-disks-config": '{{ item.config | to_json }}'
+          node.longhorn.io/default-disks-config: "{{ item.config | to_json }}"
         labels:
           longhorn-enabled: "true"
   loop: "{{ longhorn_disks_config }}"

@@ -1,3 +1,4 @@
+---
 - name: Create cilium Namespace
   kubernetes.core.k8s:
     name: "{{ cilium_namespace }}"
@@ -39,7 +40,7 @@
       cni:
         exclusive: false
       ipv4NativeRoutingCIDR: "{{ cilium_ipv4NativeRoutingCIDR }}"
-      ipv6NativeRoutingCIDR : "{{ cilium_ipv6NativeRoutingCIDR }}"
+      ipv6NativeRoutingCIDR: "{{ cilium_ipv6NativeRoutingCIDR }}"
       k8sServiceHost: "{{ api_endpoint }}"
       k8sServicePort: "{{ api_port | default(6443) }}"
       l7Proxy: false

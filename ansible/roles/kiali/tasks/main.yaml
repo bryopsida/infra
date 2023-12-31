@@ -1,3 +1,4 @@
+---
 - name: Add Kiali Helm Repo
   tags: istio
   kubernetes.core.helm_repository:
@@ -31,4 +32,4 @@
             tracing:
               enabled: true
               in_cluster_url: http://jaeger-query.jaeger.svc.cluster.local:16685/jaeger
-              use_grpc: true  
+              use_grpc: true

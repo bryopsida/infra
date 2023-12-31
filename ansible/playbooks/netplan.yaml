@@ -15,16 +15,16 @@
             eth0:
               dhcp6: false
               dhcp6-overrides:
-                use-dns: no
+                use-dns: false
               dhcp4: true
               dhcp4-overrides:
-                use-dns: no
+                use-dns: false
               accept-ra: true
               optional: false
               ipv6-privacy: true
               nameservers:
                 search: []
                 addresses:
-                  - '1.1.1.1'
-                  - '1.0.0.1'
-                  - '2606:4700:4700::1111'
+                  - 1.1.1.1
+                  - 1.0.0.1
+                  - 2606:4700:4700::1111

@@ -1,0 +1,38 @@
+---
+- name: Create syslog_portal Namespace
+  kubernetes.core.k8s:
+    name: "{{ syslog_portal_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: syslog_portal
+- name: Make syslog_portal namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ syslog_portal_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: restricted
+          pod-security.kubernetes.io/audit: restricted
+          pod-security.kubernetes.io/warn: restricted
+  tags: syslog_portal
+- name: Add syslog_portal Helm Repo
+  kubernetes.core.helm_repository:
+    name: bryopsida
+    repo_url: https://bryopsida.github.io/helm
+  tags: syslog_portal
+- name: Install syslog_portal
+  tags: syslog_portal
+  kubernetes.core.helm:
+    chart_ref: syslog_portal/syslog_portal
+    state: "{{ syslog_portal_state }}"
+    release_namespace: "{{ syslog_portal_namespace }}"
+    name: syslog_portal
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ syslog_portal_wait_timeout }}"
+    chart_version: "{{ syslog_portal_version }}"

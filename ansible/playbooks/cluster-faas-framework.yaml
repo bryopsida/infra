@@ -3,4 +3,5 @@
   hosts: controller
   become: true
   roles:
-    - role: knative
+    - role: openfaas
+      when: openfaas_enabled

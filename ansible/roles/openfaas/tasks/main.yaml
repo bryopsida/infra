@@ -1,0 +1,38 @@
+---
+- name: Create openfaas Namespace
+  kubernetes.core.k8s:
+    name: "{{ openfaas_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: openfaas
+- name: Make openfaas namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ openfaas_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: restricted
+          pod-security.kubernetes.io/audit: restricted
+          pod-security.kubernetes.io/warn: restricted
+  tags: openfaas
+- name: Add openfaas Helm Repo
+  kubernetes.core.helm_repository:
+    name: openfaas
+    repo_url: https://openfaas.github.io/faas-netes
+  tags: openfaas
+- name: Install openfaas
+  tags: openfaas
+  kubernetes.core.helm:
+    chart_ref: openfaas/openfaas
+    state: "{{ openfaas_state }}"
+    release_namespace: "{{ openfaas_namespace }}"
+    name: openfaas
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ openfaas_wait_timeout }}"
+    chart_version: "{{ openfaas_version }}"

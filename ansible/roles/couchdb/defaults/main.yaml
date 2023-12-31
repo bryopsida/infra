@@ -1,0 +1,6 @@
+---
+couchdb_state: present
+couchdb_version: 4.4.5
+couchdb_wait_timeout: 5m0s
+couchdb_namespace: couchdb
+couchdb_enabled: false

@@ -1,3 +1,4 @@
+---
 - name: Create plex Namespace
   kubernetes.core.k8s:
     name: "{{ plex_namespace }}"
@@ -58,4 +59,3 @@
         repository: "{{ plex_image_repo }}"
         pullPolicy: "{{ plex_image_pull_policy }}"
         tag: "{{ plex_image_tag }}"
-    

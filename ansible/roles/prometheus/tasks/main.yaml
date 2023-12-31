@@ -1,3 +1,4 @@
+---
 - name: Create prometheus Namespace
   kubernetes.core.k8s:
     name: "{{ prometheus_namespace }}"

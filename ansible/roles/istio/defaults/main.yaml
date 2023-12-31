@@ -1,5 +1,6 @@
+---
 istio_version: 1.20.1
 istio_state: present
 istio_cni_state: present
 istio_ingress_state: present
-
+istio_enabled: false

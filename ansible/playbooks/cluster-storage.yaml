@@ -4,5 +4,10 @@
   become: true
   roles:
     - role: longhorn_disks_config
+      when: longhorn_enabled
     - role: longhorn
+      when: longhorn_enabled
     - role: longhorn_storage_classes
+      when: longhorn_enabled
+    - role: object_store
+      when: object_store_enabled

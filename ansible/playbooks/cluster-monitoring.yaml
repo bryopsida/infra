@@ -3,9 +3,15 @@
   hosts: controller
   become: true
   roles:
-    - role: elastic_search
+    - role: open_search
+      when: open_search_enabled
     - role: prometheus
+      when: prometheus_enabled
     - role: jaeger
+      when: jaeger_enabled
     - role: kiali
+      when: kiali_enabled
     - role: couchdb
+      when: couchdb_enabled
     - role: syslog_portal
+      when: syslog_portal_enabled

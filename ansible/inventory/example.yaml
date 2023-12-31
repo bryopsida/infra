@@ -10,7 +10,7 @@ all:
           kube_config: /etc/rancher/k3s/k3s.yaml
           helm_wait: true
           longhorn_storage_classes_manages_default_sc: true
-          longhorn_storage_classes_default_sc: 'ssd'
+          longhorn_storage_classes_default_sc: ssd
           longhorn_storage_classes_secrets:
             - name: mechnical
               namespace: longhorn-system
@@ -18,56 +18,56 @@ all:
               hash: sha256
               pbkdf: argon2i
               cipher: aes-xts-plain64
-              size: '256'
+              size: "256"
               provider: secret
-              key: 'changeit'
+              key: changeit
             - name: ssd
               namespace: longhorn-system
               state: present
               hash: sha256
               pbkdf: argon2i
               cipher: aes-xts-plain64
-              size: '256'
+              size: "256"
               provider: secret
-              key: 'changeit'
+              key: changeit
           longhorn_storage_classes_sc:
             - name: ssd
               allowVolumeExpansion: true
               reclaimPolicy: Retain
               volumeBindingMode: Immediate
-              replicas: '1'
-              staleReplicaTimeout: '2880'
-              encrypted: 'true'
-              fsType: 'ext4'
-              diskSelector: 'ssd'
-              nodeSelector: ''
-              dataLocality: 'disabled'
-              mkfsParams: ''
+              replicas: "1"
+              staleReplicaTimeout: "2880"
+              encrypted: "true"
+              fsType: ext4
+              diskSelector: ssd
+              nodeSelector: ""
+              dataLocality: disabled
+              mkfsParams: ""
               mountOptions: []
-              migratable: 'false'
-              recurringJobsSelector: ''
-              nfsOptions: ''
-              secretName: 'ssd'
-              secretNamespace: 'longhorn-system'
+              migratable: "false"
+              recurringJobsSelector: ""
+              nfsOptions: ""
+              secretName: ssd
+              secretNamespace: longhorn-system
               state: present
             - name: mechnical
               allowVolumeExpansion: true
               reclaimPolicy: Retain
               volumeBindingMode: Immediate
-              replicas: '1'
-              staleReplicaTimeout: '2880'
-              encrypted: 'true'
-              fsType: 'ext4'
-              diskSelector: 'slow'
-              nodeSelector: ''
-              dataLocality: 'disabled'
-              mkfsParams: ''
+              replicas: "1"
+              staleReplicaTimeout: "2880"
+              encrypted: "true"
+              fsType: ext4
+              diskSelector: slow
+              nodeSelector: ""
+              dataLocality: disabled
+              mkfsParams: ""
               mountOptions: []
-              migratable: 'false'
-              recurringJobsSelector: ''
-              nfsOptions: ''
-              secretName: 'mechnical'
-              secretNamespace: 'longhorn-system'
+              migratable: "false"
+              recurringJobsSelector: ""
+              nfsOptions: ""
+              secretName: mechnical
+              secretNamespace: longhorn-system
               state: present
           longhorn_disks_config:
             - node: disk-node-1
