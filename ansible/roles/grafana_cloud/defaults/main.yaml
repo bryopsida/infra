@@ -1,0 +1,14 @@
+grafana_cloud_enabled: false
+grafana_cloud_state: present
+grafana_cloud_wait_timeout: 15m0s
+grafana_cloud_namespace: grafana-cloud
+grafana_cloud_cluster_name: changeit
+grafana_cloud_prom_host: changeit
+grafana_cloud_loki_host: changeit
+grafana_cloud_tempo_host: changeit
+grafana_cloud_prom_username: changeit
+grafana_cloud_prom_password: changeit
+grafana_cloud_loki_username: changeit
+grafana_cloud_loki_password: changeit
+grafana_cloud_tempo_username: changeit
+grafana_cloud_tempo_password: changeit

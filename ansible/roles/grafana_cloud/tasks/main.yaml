@@ -1,0 +1,65 @@
+---
+- name: Create grafana-cloud Namespace
+  kubernetes.core.k8s:
+    name: "{{ grafana_cloud_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: grafana-cloud
+- name: Make grafana-cloud namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ grafana_cloud_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: grafana_cloud
+- name: Add grafana-cloud Helm Repo
+  kubernetes.core.helm_repository:
+    name: grafana-cloud
+    repo_url: https://grafana.github.io/helm-charts
+  tags: grafana-cloud
+- name: Manage grafana-cloud release
+  tags: grafana-cloud
+  kubernetes.core.helm:
+    chart_ref: grafana-cloud/k8s-monitoring
+    state: "{{ grafana_cloud_state }}"
+    release_namespace: "{{ grafana_cloud_namespace }}"
+    name: grafana-k8s-monitoring
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ grafana_cloud_wait_timeout }}"
+    values:
+      cluster:
+        name: "{{ grafana_cloud_cluster_name }}"
+      externalServices:
+        prometheus:
+          host: "{{ grafana_cloud_prom_host }}"
+          basicAuth:
+            username: "{{ grafana_cloud_prom_username }}"
+            password: "{{ grafana_cloud_prom_password }}"
+        loki:
+          host: "{{ grafana_cloud_loki_host }}"
+          basicAuth:
+            username: "{{ grafana_cloud_loki_username }}"
+            password: "{{ grafana_cloud_loki_password }}"
+        tempo:
+          host: "{{ grafana_cloud_tempo_host }}"
+          basicAuth:
+            username: "{{ grafana_cloud_tempo_username }}"
+            password: "{{ grafana_cloud_tempo_password }}"
+      opencost:
+        opencost:
+          exporter:
+            defaultClusterId: "{{ grafana_cloud_cluster_name }}"
+          prometheus:
+            external:
+              url: "{{ grafana_cloud_prom_host }}/api/prom"
+      traces:
+        enabled: true

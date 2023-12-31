@@ -70,7 +70,7 @@
           tracer: zipkin
         tracer:
           zipkin:
-            address: grafana-agent.grafana.svc.cluster.local.:9411
+            address: "{{ istio_trace_url }}"
       pilot:
         env:
           ISTIO_DUAL_STACK: "true"
