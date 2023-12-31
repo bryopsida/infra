@@ -3,6 +3,8 @@
   hosts: controller
   become: true
   roles:
+    - role: registry
+      when: registry_enabled
     - role: plex
       when: plex_enabled
     - role: openmct

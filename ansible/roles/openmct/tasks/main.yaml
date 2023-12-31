@@ -76,3 +76,6 @@
                   host: openmct.openmct.svc.cluster.local
                   port:
                     number: 80
+# - name: Manage istio peer policy
+
+# - name: Manage cilium network policy

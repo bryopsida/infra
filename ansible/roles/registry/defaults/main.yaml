@@ -4,4 +4,13 @@ registry_version: 1.13.1
 registry_state: present
 registry_wait_timeout: 10m0s
 registry_enabled: true
+registry_gateway_name: istio-ingress/default-gateway
 registry_hostname: registry.test
+registry_storage_class: ~
+registry_storage_size: 50Gi
+registry_db_storage_class: ~
+registry_db_size: 1Gi
+registry_joblog_storage_class: ~
+registry_joblog_size: 1Gi
+registry_redis_storage_class: ~
+registry_redis_size: 1Gi

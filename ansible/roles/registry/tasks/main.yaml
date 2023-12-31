@@ -1,0 +1,115 @@
+---
+- name: Create registry Namespace
+  kubernetes.core.k8s:
+    name: "{{ registry_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: registry
+- name: Manage registry namespace
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ registry_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+- name: Manage registry helm repo
+  kubernetes.core.helm_repository:
+    name: harbor
+    repo_url: https://helm.goharbor.io
+  tags: registry
+- name: Manage registry helm release
+  tags: registry
+  kubernetes.core.helm:
+    chart_ref: harbor/harbor
+    state: "{{ registry_state }}"
+    release_namespace: "{{ registry_namespace }}"
+    name: registry
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ registry_wait_timeout }}"
+    chart_version: "{{ registry_version }}"
+    values:
+      # images are not yet multi-platform/arch, must run on amd64 nodes
+      core:
+        nodeSelector:
+          kubernetes.io/arch: amd64
+      jobservice:
+        nodeSelector:
+          kubernetes.io/arch: amd64
+      nginx:
+        nodeSelector:
+          kubernetes.io/arch: amd64
+      portal:
+        nodeSelector:
+          kubernetes.io/arch: amd64
+      redis:
+        internal:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+      database:
+        internal:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+      registry:
+        nodeSelector:
+          kubernetes.io/arch: amd64
+      expose:
+        type: clusterIP
+        tls:
+          enabled: false
+      persistence:
+        persistentVolumeClaim:
+          registry:
+            storageClass: "{{ registry_storage_class }}"
+            size: "{{ registry_storage_size }}"
+          database:
+            storageClass: "{{ registry_db_storage_class }}"
+            size: "{{ registry_db_size }}"
+          jobservice:
+            jobLob:
+              storageClass: "{{ registry_joblog_storage_class }}"
+              size: "{{ registry_joblog_size }}"
+          redis:
+            storageClass: "{{ registry_redis_storage_class }}"
+            size: "{{ registry_redis_size }}"
+      externalURL: "{{ registry_hostname }}"
+- name: Manage registry virtual service
+  tags:
+    - registry
+    - registry-virtualservice
+    - virtualservice
+  kubernetes.core.k8s:
+    state: "{{ registry_state }}"
+    name: "{{ registry_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      apiVersion: networking.istio.io/v1beta1
+      kind: VirtualService
+      metadata:
+        name: registry
+        namespace: "{{ registry_namespace }}"
+      spec:
+        hosts:
+        - "{{ registry_hostname }}"
+        gateways:
+        - "{{ registry_gateway_name }}"
+        http:
+          - name: registry
+            match:
+            - uri:
+                prefix: /
+            route:
+              - destination:
+                  host: harbor.registry.svc.cluster.local
+                  port:
+                    number: 80
+# - name: Manage istio peer policy
+
+# - name: Manage cilium network policy
