@@ -6,6 +6,13 @@
     state: present
     kubeconfig: "{{ kube_config }}"
   tags: openfaas
+- name: Create openfaas-fn namespace
+  kubernetes.core.k8s:
+    name: "{{ openfaas_namespace }}-fn"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: openfaas
 - name: Make openfaas namespace privileged
   kubernetes.core.k8s:
     state: patched
@@ -15,10 +22,22 @@
     definition:
       metadata:
         labels:
-          pod-security.kubernetes.io/enforce: restricted
-          pod-security.kubernetes.io/audit: restricted
-          pod-security.kubernetes.io/warn: restricted
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
   tags: openfaas
+- name: Make openfaas-fn namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ openfaas_namespace }}-fn"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
 - name: Add openfaas Helm Repo
   kubernetes.core.helm_repository:
     name: openfaas
@@ -36,3 +55,5 @@
     wait: "{{ helm_wait }}"
     wait_timeout: "{{ openfaas_wait_timeout }}"
     chart_version: "{{ openfaas_version }}"
+    values:
+      functionNamespace: "{{ openfaas_namespace }}-fn"

@@ -2,5 +2,5 @@
 openfaas_state: present
 openfaas_version: 14.2.7
 openfaas_wait_timeout: 5m0s
-openfaas_namespace: openfaas
+openfaas_namespace: faas
 openfaas_enabled: false

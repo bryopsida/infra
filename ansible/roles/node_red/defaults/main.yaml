@@ -1,2 +1,11 @@
 ---
 node_red_enabled: false
+node_red_state: present
+node_red_version: 0.29.0
+node_red_namespace: node-red
+node_red_wait_timeout: 5m0s
+node_red_disk_size: 5Gi
+node_red_disk_access_mode: "ReadWriteOnce"
+node_red_extra_modules: []
+node_red_username: changeit
+node_red_password: changeit

@@ -1,0 +1,49 @@
+---
+- name: Create node_red Namespace
+  kubernetes.core.k8s:
+    name: "{{ node_red_namespace }}"
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ kube_config }}"
+  tags: node-red
+- name: Make node_red namespace privileged
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: "{{ node_red_namespace }}"
+    kubeconfig: "{{ kube_config }}"
+    definition:
+      metadata:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  tags: node-red
+- name: Add node_red Helm Repo
+  kubernetes.core.helm_repository:
+    name: node-red
+    repo_url: https://schwarzit.github.io/node-red-chart/
+  tags: node-red
+- name: Install node_red
+  tags: node-red
+  kubernetes.core.helm:
+    chart_ref: node-red/node-red
+    state: "{{ node_red_state }}"
+    release_namespace: "{{ node_red_namespace }}"
+    name: node-red
+    kubeconfig: "{{ kube_config }}"
+    update_repo_cache: true
+    wait: "{{ helm_wait }}"
+    wait_timeout: "{{ node_red_wait_timeout }}"
+    chart_version: "{{ node_red_version }}"
+    values:
+      persistence:
+        enabled: true
+        size: "{{ node_red_disk_size }}"
+        accessmode: "{{ node_red_disk_access_mode }}"
+      sidecar:
+        enabled: true
+        extraNodeModules: "{{ node_red_extra_modules }}"
+        env:
+          username: "{{ node_red_username }}"
+          password: "{{ node_red_password }}"

@@ -9,3 +9,5 @@
       when: plex_enabled
     - role: openmct
       when: openmct_enabled
+    - role: node_red
+      when: node_red_enabled
