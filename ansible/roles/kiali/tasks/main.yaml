@@ -13,7 +13,7 @@
     kubeconfig: "{{ kube_config }}"
     update_repo_cache: true
     wait: "{{ helm_wait }}"
-    state: "{{ istio_kiali_state }}"
+    state: "{{ kiali_state }}"
     values:
       cr:
         create: true

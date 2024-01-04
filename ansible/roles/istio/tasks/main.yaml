@@ -80,6 +80,8 @@
         accessLogEncoding: JSON
         accessLogFile: /dev/stdout
         defaultConfig:
+          gatewayTopology:
+            numTrustedProxies: "{{ istio_trusted_proxy_count }}"
           proxyMetadata:
             ISTIO_AGENT_DUAL_STACK: "true"
           tracing:

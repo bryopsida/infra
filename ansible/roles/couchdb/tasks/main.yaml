@@ -6,7 +6,7 @@
     state: present
     kubeconfig: "{{ kube_config }}"
   tags: couchdb
-- name: Make couchdb namespace privileged
+- name: Make couchdb namespace restricted
   kubernetes.core.k8s:
     state: patched
     kind: Namespace
@@ -18,6 +18,7 @@
           pod-security.kubernetes.io/enforce: restricted
           pod-security.kubernetes.io/audit: restricted
           pod-security.kubernetes.io/warn: restricted
+          istio-injection: enabled
   tags: couchdb
 - name: Add couchdb Helm Repo
   kubernetes.core.helm_repository:
@@ -36,3 +37,51 @@
     wait: "{{ helm_wait }}"
     wait_timeout: "{{ couchdb_wait_timeout }}"
     chart_version: "{{ couchdb_version }}"
+    values:
+      podSecurityContext:
+        seccompProfile:
+          type: RuntimeDefault
+        fsGroup: 5984
+        fsGroupChangePolicy: "Always"
+      containerSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 5984
+        runAsGroup: 5984
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+      adminHash: "{{ couchdb_admin_hash }}"
+      adminUsername: "{{ couchdb_admin_username }}"
+      autoSetup:
+        defaultDatabases: "{{ couchdb_default_databases }}"
+        enabled: true
+      clusterSize: "{{ couchdb_cluster_size }}"
+      cookieAuthSecret: "{{ couchdb_cookie_auth_secret }}"
+      couchdbConfig:
+        cluster:
+          n: "{{ couchdb_cluster_replicas }}"
+          q: "{{ couchdb_cluster_shards }}"
+        couchdb:
+          uuid: "{{ couchdb_uuid }}"
+      createAdminSecret: true
+      enableSearch: false
+      erlangFlags:
+        setcookie: "{{ couchdb_set_cookie }}"
+      persistentVolume:
+        enabled: true
+        size: "{{ couchdb_size }}"
+        accessModes: "{{ couchdb_storage_access_modes }}"
+        storageClass: "{{ couchdb_storage_class }}"
+      podDisruptionBudget:
+        enabled: true
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - couchdb
+              topologyKey: "kubernetes.io/hostname"

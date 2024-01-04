@@ -6,3 +6,4 @@ istio_ingress_state: present
 istio_enabled: false
 istio_gateways: []
 istio_trace_url: grafana-k8s-monitoring-grafana-agent.grafana-cloud.svc.cluster.local.:9411
+istio_trusted_proxy_count: 0

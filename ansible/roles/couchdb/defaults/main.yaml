@@ -1,6 +1,21 @@
 ---
 couchdb_state: present
-couchdb_version: 4.4.5
+couchdb_version: 4.5.0
 couchdb_wait_timeout: 5m0s
 couchdb_namespace: couchdb
 couchdb_enabled: false
+couchdb_default_databases:
+  - _global_changes
+couchdb_cookie_auth_secret: changeit
+couchdb_admin_username: changeit
+couchdb_admin_hash: changeit
+couchdb_uuid: 9d412537-1ebc-4259-91c3-eda73085031a
+couchdb_size: 60Gi
+couchdb_storage_class: ~
+couchdb_storage_access_modes:
+  - ReadWriteOnce
+couchdb_cluster_size: 1
+couchdb_cluster_shards: 1
+couchdb_cluster_replicas: 1
+couchdb_virtual_service_enabled: false
+couchdb_set_cookie: erlang-cookie

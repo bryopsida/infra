@@ -37,6 +37,7 @@
     wait_timeout: "{{ plex_wait_timeout }}"
     chart_version: "{{ plex_chart_version }}"
     values:
+      hostNetwork: "{{ plex_hostnetwork }}"
       claimToken: "{{ plex_claim_token }}"
       configStorageSize: "{{ plex_config_vol_size }}"
       configStorageClass: "{{ plex_config_vol_sc }}"
@@ -44,6 +45,19 @@
       mediaStorageClass: "{{ plex_media_vol_sc }}"
       transcodeStorageSize: "{{ plex_transcode_vol_size }}"
       transcodeStorageClass: "{{ plex_transcode_vol_sc }}"
+      virtualService:
+        enabled: true
+        hosts:
+          - "{{ plex_hostname }}"
+      volumes:
+        - name: dri
+          hostPath:
+            path: /dev/dri
+      volumeMounts:
+        - name: dri
+          mountPath: /dev/dri
+      nodeSelector:
+        kubernetes.io/arch: amd64
       # linuxserver images use a init system that requires root
       # in the future look into replacing their image with an image that can run non privileged
       # securityContext:

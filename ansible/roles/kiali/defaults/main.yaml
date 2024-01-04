@@ -1,4 +1,4 @@
 ---
-istio_kiali_state: present
-istio_kiali_version: 1.78.0
-kyverno_enabled: false
+kiali_state: present
+kiali_enabled: false
+kiali_version: 1.78.0
