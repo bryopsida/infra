@@ -1,0 +1,6 @@
+---
+- name: Manage Node.JS package
+  become: true
+  hosts: all
+  roles:
+    - role: node
