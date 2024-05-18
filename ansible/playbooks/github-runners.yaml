@@ -1,0 +1,7 @@
+---
+- name: Manage GitHub Runners
+  hosts: github_runners
+  become: true
+  roles:
+    - role: rootless_containerd
+    - role: github_runner
