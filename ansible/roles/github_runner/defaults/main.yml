@@ -9,3 +9,10 @@ github_runner_download_url: "https://github.com/actions/runner/releases/download
 github_runner_group: default
 github_runner_name: "{{ ansible_hostname }}"
 github_runner_extra_labels: ~
+github_runner_extra_packages:
+  - build-essential
+  - dotnet-sdk-8.0
+github_runner_links:
+  - src: /usr/local/bin/nerdctl
+    dest: /usr/local/bin/docker
+

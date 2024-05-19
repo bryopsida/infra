@@ -3,6 +3,7 @@
   become: true
   become_user: "{{ item.user }}"
   ansible.builtin.command: id -ru
+  changed_when: false
   register: rootless_containerd_effective_id
 - name: Setup rootless containerd
   become: true

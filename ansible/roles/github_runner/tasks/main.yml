@@ -49,29 +49,82 @@
   become: true
   become_user: "{{ github_runner_user }}"
   ansible.builtin.command: id -ru
+  changed_when: false
   register: github_runner_effective_id
+- name: Create /opt/github folder
+  become: true
+  ansible.builtin.file:
+    owner: root
+    group: root
+    mode: 0755
+    path: "/opt/github"
+    state: directory
+    recurse: true
+- name: Render Pre-Start hook
+  become: true
+  ansible.builtin.template:
+    src: pre-start.sh.j2
+    dest: /opt/github/pre-start.sh
+    owner: root
+    group: root
+    mode: 0755
+- name: Render Post-Run hook
+  become: true
+  ansible.builtin.template:
+    src: post-run.sh.j2
+    dest: /opt/github/post-run.sh
+    owner: root
+    group: root
+    mode: 0755
+- name: Install Packages
+  become: true
+  ansible.builtin.apt:
+    package: "{{ github_runner_extra_packages }}"
+    state: present
+- name: Check If Configured
+  become: true
+  ansible.builtin.stat:
+    path: /home/{{ github_runner_user }}/actions-runner/.credentials
+  register: github_runner_credentials_file
+- name: Configure
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.command: "/home/{{ github_runner_user }}/actions-runner/config.sh --url {{ github_runner_url }} --token {{ github_runner_token }} --name {{ github_runner_name }} --runnergroup {{ github_runner_group }} --labels {{ github_runner_extra_labels }} --replace --unattended"
+  when: not github_runner_credentials_file.stat.exists
+- name: Set ACTIONS_RUNNER_HOOK_JOB_STARTED var
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.lineinfile:
+    path: /home/{{ github_runner_user }}/actions-runner/.env
+    regexp: '^ACTIONS_RUNNER_HOOK_JOB_STARTED'
+    line: "ACTIONS_RUNNER_HOOK_JOB_STARTED=/opt/github/pre-start.sh"
+- name: Set ACTIONS_RUNNER_HOOK_JOB_COMPLETED var
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.lineinfile:
+    path: /home/{{ github_runner_user }}/actions-runner/.env
+    regexp: '^ACTIONS_RUNNER_HOOK_JOB_COMPLETED'
+    line: "ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/opt/github/post-run.sh"
 - name: Set XDG_RUNTIME_DIR var
   become: true
   become_user: "{{ github_runner_user }}"
   ansible.builtin.lineinfile:
     path: /home/{{ github_runner_user }}/actions-runner/.env
     regexp: '^XDG_RUNTIME_DIR'
-    insertafter: '^#Listen '
     line: "XDG_RUNTIME_DIR=/run/user/{{ github_runner_effective_id.stdout }}"
-- name: Remove old config
+- name: Setup Links
   become: true
-  become_user: "{{ github_runner_user }}"
-  ansible.builtin.command: "/home/{{ github_runner_user }}/actions-runner/config.sh remove --token {{ github_runner_token }}"
-  ignore_errors: true
-- name: Configure
-  become: true
-  become_user: "{{ github_runner_user }}"
-  ansible.builtin.command: "/home/{{ github_runner_user }}/actions-runner/config.sh --url {{ github_runner_url }} --token {{ github_runner_token }} --name {{ github_runner_name }} --runnergroup {{ github_runner_group }} --labels {{ github_runner_extra_labels }} --replace --unattended"
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  loop: "{{ github_runner_links }}"
 - name: Install Service
   become: true
   ansible.builtin.command:
     cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh install {{ github_runner_user }}"
     chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: not github_runner_credentials_file.stat.exists
 - name: Start Service
   become: true
   tags:
@@ -79,3 +132,20 @@
   ansible.builtin.command:
     cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh start {{ github_runner_user }}"
     chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: not github_runner_credentials_file.stat.exists
+- name: Stop Service
+  become: true
+  tags:
+    - start-github-runner
+  ansible.builtin.command:
+    cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh stop {{ github_runner_user }}"
+    chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: github_runner_credentials_file.stat.exists
+- name: Start Service
+  become: true
+  tags:
+    - start-github-runner
+  ansible.builtin.command:
+    cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh start {{ github_runner_user }}"
+    chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: github_runner_credentials_file.stat.exists
