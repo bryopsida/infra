@@ -1,0 +1,9 @@
+---
+rootless_containerd_arch: arm64
+rootless_containerd_version: 1.7.6
+rootless_containerd_hash: sha256:4fa0a6e936c7a9cb9bb81e784fddaa593cb00afb48b08842e3f0503748c21348
+rootless_containerd_buildkit_version: 0.13.2
+rootless_containerd_buildkit_hash: sha256:bcc4cb4fec79847682fbb2ce8f612e5e854636ae6c262cee4b657d2b5c2fd46c
+rootless_containerd_cni_version: 1.4.1
+rootless_containerd_cni_hash: sha256:56fe62d73942cffd8f119d2b8ecb6a062e85f529a3dbfc7aa5cd83c2c01929a7
+rootless_containerd_users: []

@@ -1,0 +1,84 @@
+---
+- name: Ensure dependencies are installed.
+  become: true
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+    state: present
+- name: Add apt key
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/{{ 'ubuntu' if ansible_distribution in ['Pop!_OS', 'Linux Mint'] else ansible_distribution | lower }}/gpg"
+    dest: /etc/apt/trusted.gpg.d/docker.asc
+    mode: '0644'
+    force: false
+    checksum: "sha256:1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570"
+  register: add_repository_key
+- name: Add Docker Repository
+  apt_repository:
+    repo: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }} signed-by=/etc/apt/trusted.gpg.d/docker.asc] https://download.docker.com/linux/{{ 'ubuntu' if ansible_distribution in ['Pop!_OS', 'Linux Mint'] else ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+
+- name: Install packages
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    package:
+      - dbus-user-session
+      - uidmap
+      - containerd
+      - docker-ce-rootless-extras
+- name: Download nerdctl
+  ansible.builtin.get_url:
+    url: https://github.com/containerd/nerdctl/releases/download/v{{ rootless_containerd_version }}/nerdctl-{{ rootless_containerd_version }}-linux-{{ rootless_containerd_arch }}.tar.gz
+    dest: "{{ ansible_user_dir }}/nerdctl-{{ rootless_containerd_version }}.tar.gz"
+    checksum: "{{ rootless_containerd_hash }}"
+  register: rootless_containerd_download
+- name: Unarchive nerdctl
+  become: true
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "{{ ansible_user_dir }}/nerdctl-{{ rootless_containerd_version }}.tar.gz"
+    dest: /usr/local/bin
+  when: rootless_containerd_download.changed
+- name: Download buildkit
+  ansible.builtin.get_url:
+    url: https://github.com/moby/buildkit/releases/download/v{{ rootless_containerd_buildkit_version }}/buildkit-v{{ rootless_containerd_buildkit_version }}.linux-{{ rootless_containerd_arch }}.tar.gz
+    dest: "{{ ansible_user_dir }}/buildkit-{{ rootless_containerd_buildkit_version }}.tar.gz"
+    checksum: "{{ rootless_containerd_buildkit_hash }}"
+  register: rootless_containerd_buildkit_download
+- name: Unarchive buildkit
+  become: true
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "{{ ansible_user_dir }}/buildkit-{{ rootless_containerd_buildkit_version }}.tar.gz"
+    dest: /usr/local/bin
+    include: bin
+    extra_opts: ['--strip-components=1', '--show-stored-names']
+  when: rootless_containerd_buildkit_download.changed
+- name: Download cni plugins
+  ansible.builtin.get_url:
+    url: https://github.com/containernetworking/plugins/releases/download/v{{ rootless_containerd_cni_version }}/cni-plugins-linux-{{ rootless_containerd_arch }}-v{{ rootless_containerd_cni_version }}.tgz
+    dest: "{{ ansible_user_dir }}/cni-{{ rootless_containerd_cni_version }}.tar.gz"
+    checksum: "{{ rootless_containerd_cni_hash }}"
+  register: rootless_containerd_cni_download
+- name: Create CNI dir
+  become: true
+  ansible.builtin.file:
+    owner: root
+    group: root
+    path: /opt/cni/bin
+    state: directory
+    recurse: true
+    mode: 0755
+- name: Unarchive cni plugins
+  become: true
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "{{ ansible_user_dir }}/cni-{{ rootless_containerd_cni_version }}.tar.gz"
+    dest: /opt/cni/bin
+  when: rootless_containerd_cni_download.changed
+
+- name: Setup rootless containerd
+  include_tasks: user-setup.yml
+  loop: "{{ rootless_containerd_users }}"
