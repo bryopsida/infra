@@ -1,9 +1,9 @@
 ---
-- hosts: k3s_cluster
+- hosts: managed_netplans
   gather_facts: true
   become: true
   roles:
-    - role: mrlesmithjr.netplan
+    - role: netplan
       become: true
       netplan_enabled: true
       netplan_config_file: /etc/netplan/50-cloud-init.yaml
@@ -24,7 +24,6 @@
               ipv6-privacy: true
               nameservers:
                 search: []
-                addresses:
-                  - 1.1.1.1
-                  - 1.0.0.1
-                  - 2606:4700:4700::1111
+                addresses: "{{ netplan_dns_servers }}"
+    - role: secure_dns
+      become: true

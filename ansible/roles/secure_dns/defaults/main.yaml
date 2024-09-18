@@ -1,0 +1,2 @@
+secure_dns_dnssec: true
+secure_dns_dot: true

@@ -3,5 +3,6 @@ collections:
   - kubernetes.core
   - community.general
 roles:
-  - mrlesmithjr.netplan
+  - name: netplan
+    src: https://github.com/bryopsida/ansible-netplan
   - hifis.unattended_upgrades
