@@ -1,2 +1,4 @@
-secure_dns_dnssec: true
-secure_dns_dot: true
+secure_dns_dnssec: yes
+secure_dns_dot: yes
+secure_dns_servers: []
+  # - 1.1.1.1#cloudflare-dns.com
