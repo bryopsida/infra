@@ -1,0 +1,151 @@
+---
+- name: Install Pre-Reqs
+  become: true
+  ansible.builtin.apt:
+    package: acl
+- name: Add user for runner
+  become: true
+  ansible.builtin.user:
+    name: github
+    comment: GitHub Self Hosted Runner
+    uid: 10001
+    shell: /bin/nologin
+    create_home: true
+- name: Download runner
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ github_runner_download_url }}"
+    dest: "/home/{{ github_runner_user }}/runner-{{ github_runner_version }}.tar.gz"
+    checksum: "{{ github_runner_install_hash }}"
+  register: github_runner_download
+- name: Change Owner
+  become: true
+  ansible.builtin.file:
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    path: "/home/{{ github_runner_user }}/runner-{{ github_runner_version }}.tar.gz"
+- name: Create Folder
+  become: true
+  ansible.builtin.file:
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    path: "/home/{{ github_runner_user }}/actions-runner"
+    state: directory
+- name: Unarchive runner
+  become: true
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "/home/{{ github_runner_user }}/runner-{{ github_runner_version }}.tar.gz"
+    dest: "/home/{{ github_runner_user }}/actions-runner/"
+  when: github_runner_download.changed
+- name: Update ownership
+  become: true
+  ansible.builtin.file:
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    path: "/home/{{ github_runner_user }}/actions-runner"
+    recurse: true
+- name: Get Effective ID
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.command: id -ru
+  changed_when: false
+  register: github_runner_effective_id
+- name: Create /opt/github folder
+  become: true
+  ansible.builtin.file:
+    owner: root
+    group: root
+    mode: 0755
+    path: "/opt/github"
+    state: directory
+    recurse: true
+- name: Render Pre-Start hook
+  become: true
+  ansible.builtin.template:
+    src: pre-start.sh.j2
+    dest: /opt/github/pre-start.sh
+    owner: root
+    group: root
+    mode: 0755
+- name: Render Post-Run hook
+  become: true
+  ansible.builtin.template:
+    src: post-run.sh.j2
+    dest: /opt/github/post-run.sh
+    owner: root
+    group: root
+    mode: 0755
+- name: Install Packages
+  become: true
+  ansible.builtin.apt:
+    package: "{{ github_runner_extra_packages }}"
+    state: present
+- name: Check If Configured
+  become: true
+  ansible.builtin.stat:
+    path: /home/{{ github_runner_user }}/actions-runner/.credentials
+  register: github_runner_credentials_file
+- name: Configure
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.command: "/home/{{ github_runner_user }}/actions-runner/config.sh --url {{ github_runner_url }} --token {{ github_runner_token }} --name {{ github_runner_name }} --runnergroup {{ github_runner_group }} --labels {{ github_runner_extra_labels }} --replace --unattended"
+  when: not github_runner_credentials_file.stat.exists
+- name: Set ACTIONS_RUNNER_HOOK_JOB_STARTED var
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.lineinfile:
+    path: /home/{{ github_runner_user }}/actions-runner/.env
+    regexp: '^ACTIONS_RUNNER_HOOK_JOB_STARTED'
+    line: "ACTIONS_RUNNER_HOOK_JOB_STARTED=/opt/github/pre-start.sh"
+- name: Set ACTIONS_RUNNER_HOOK_JOB_COMPLETED var
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.lineinfile:
+    path: /home/{{ github_runner_user }}/actions-runner/.env
+    regexp: '^ACTIONS_RUNNER_HOOK_JOB_COMPLETED'
+    line: "ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/opt/github/post-run.sh"
+- name: Set XDG_RUNTIME_DIR var
+  become: true
+  become_user: "{{ github_runner_user }}"
+  ansible.builtin.lineinfile:
+    path: /home/{{ github_runner_user }}/actions-runner/.env
+    regexp: '^XDG_RUNTIME_DIR'
+    line: "XDG_RUNTIME_DIR=/run/user/{{ github_runner_effective_id.stdout }}"
+- name: Setup Links
+  become: true
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  loop: "{{ github_runner_links }}"
+- name: Install Service
+  become: true
+  ansible.builtin.command:
+    cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh install {{ github_runner_user }}"
+    chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: not github_runner_credentials_file.stat.exists
+- name: Start Service
+  become: true
+  tags:
+    - start-github-runner
+  ansible.builtin.command:
+    cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh start {{ github_runner_user }}"
+    chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: not github_runner_credentials_file.stat.exists
+- name: Stop Service
+  become: true
+  tags:
+    - start-github-runner
+  ansible.builtin.command:
+    cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh stop {{ github_runner_user }}"
+    chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: github_runner_credentials_file.stat.exists
+- name: Start Service
+  become: true
+  tags:
+    - start-github-runner
+  ansible.builtin.command:
+    cmd: "/home/{{ github_runner_user }}/actions-runner/svc.sh start {{ github_runner_user }}"
+    chdir: "/home/{{ github_runner_user }}/actions-runner/"
+  when: github_runner_credentials_file.stat.exists

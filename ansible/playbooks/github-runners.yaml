@@ -1,7 +1,15 @@
 ---
 - name: Manage GitHub Runners
   hosts: github_runners
-  become: true
+  become: false
   roles:
-    - role: rootless_containerd
     - role: github_runner
+      tags:
+        - github-runner
+    - role: rootless_containerd
+      tags:
+        - rootless-containerd
+      vars:
+        rootless_containerd_users:
+          - user: github
+  
